@@ -4,14 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
-// HealthCheck(args).Wait();
+//HealthCheck(args).Wait();
 
 //CreateTable(args).Wait();
 
 
-new DominandoEfCore.Data.ApplicationContext().Departamentos.AsNoTracking().Any();
-GenerateStateConnection(true).Wait();
-GenerateStateConnection(false).Wait();
+// new DominandoEfCore.Data.ApplicationContext().Departamentos.AsNoTracking().Any();
+// GenerateStateConnection(true).Wait();
+// GenerateStateConnection(false).Wait();
+
+ExecuteSql().Wait();
 
 static async Task CreateTable(string[] args)
 {
@@ -62,4 +64,11 @@ static async Task GenerateStateConnection(bool state){
     var mensagem = $"Tempo: {time.Elapsed.ToString()}, State: {state.ToString()}, Count: {_count}";
 
     Console.WriteLine(mensagem);
+}
+
+static async Task ExecuteSql(){
+    await using var db = new ApplicationContext();
+    await db.Database.ExecuteSqlRawAsync("SELECT 1");
+
+    await db.Database.ExecuteSqlInterpolatedAsync($"SELECT 1");
 }
