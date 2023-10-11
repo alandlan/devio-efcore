@@ -15,7 +15,11 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 //ExecuteSql().Wait();
 
-SqlInjection().Wait();
+// SqlInjection().Wait();
+
+//PendiongMigrations().Wait();
+
+AplicationMigration().Wait();
 
 static async Task CreateTable(string[] args)
 {
@@ -95,3 +99,22 @@ static async Task SqlInjection(){
         Console.WriteLine($"Id: {departamento.Id}, Descricao: {departamento.Descricao}");
     }
 }
+
+static async Task PendiongMigrations(){
+    using var db = new ApplicationContext();
+
+    var migracoesPendentes = await db.Database.GetPendingMigrationsAsync();
+
+    Console.WriteLine($"Total: {migracoesPendentes.Count()}");
+
+    foreach (var migracao in migracoesPendentes)
+    {
+        Console.WriteLine($"Migração: {migracao}");
+    }
+}
+
+static async Task AplicationMigration(){
+    using var db = new ApplicationContext();
+
+    await db.Database.MigrateAsync();
+}   
