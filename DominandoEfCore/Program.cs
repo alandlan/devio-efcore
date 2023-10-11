@@ -19,7 +19,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 //PendiongMigrations().Wait();
 
-AplicationMigration().Wait();
+//AplicationMigration().Wait();
+
+AllMigrations().Wait();
 
 static async Task CreateTable(string[] args)
 {
@@ -117,4 +119,17 @@ static async Task AplicationMigration(){
     using var db = new ApplicationContext();
 
     await db.Database.MigrateAsync();
-}   
+}
+
+static async Task AllMigrations(){
+    using var db = new ApplicationContext();
+
+    var migracoes = db.Database.GetMigrations();
+
+    Console.WriteLine($"Total: {migracoes.Count()}");
+
+    foreach (var migracao in migracoes)
+    {
+        Console.WriteLine($"Migração: {migracao}");
+    }
+}
