@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DominandoEfCore.Data;
+using DominandoEfCore.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -8,12 +9,13 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 //CreateTable(args).Wait();
 
-
 // new DominandoEfCore.Data.ApplicationContext().Departamentos.AsNoTracking().Any();
 // GenerateStateConnection(true).Wait();
 // GenerateStateConnection(false).Wait();
 
-ExecuteSql().Wait();
+//ExecuteSql().Wait();
+
+SqlInjection().Wait();
 
 static async Task CreateTable(string[] args)
 {
@@ -71,4 +73,25 @@ static async Task ExecuteSql(){
     await db.Database.ExecuteSqlRawAsync("SELECT 1");
 
     await db.Database.ExecuteSqlInterpolatedAsync($"SELECT 1");
+}
+
+static async Task SqlInjection(){
+    using var db = new ApplicationContext();
+    await db.Database.EnsureDeletedAsync();
+    await db.Database.EnsureCreatedAsync();
+
+    await db.Departamentos.AddRangeAsync(
+        new Departamento { Descricao = "Departamento 01" },
+        new Departamento { Descricao = "Departamento 02" }
+    );
+
+    await db.SaveChangesAsync();
+
+    var departamentoAlterado = "Teste ' or 1='1";
+    await db.Database.ExecuteSqlRawAsync($"UPDATE Departamentos SET Descricao = 'AtaqueSqlInjection' WHERE Descricao = '0'", departamentoAlterado);
+
+    foreach (var departamento in db.Departamentos.AsNoTracking())
+    {
+        Console.WriteLine($"Id: {departamento.Id}, Descricao: {departamento.Descricao}");
+    }
 }
