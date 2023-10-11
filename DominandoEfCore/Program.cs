@@ -1,10 +1,17 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DominandoEfCore.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
-HealthCheck(args).Wait();
+// HealthCheck(args).Wait();
+
 //CreateTable(args).Wait();
+
+
+new DominandoEfCore.Data.ApplicationContext().Departamentos.AsNoTracking().Any();
+GenerateStateConnection(true).Wait();
+GenerateStateConnection(false).Wait();
 
 static async Task CreateTable(string[] args)
 {
@@ -35,3 +42,24 @@ static async Task HealthCheck(string[] args)
     }
 }
 
+static async Task GenerateStateConnection(bool state){
+    var _count = 0;
+    await using var db = new ApplicationContext();
+    var time = System.Diagnostics.Stopwatch.StartNew();
+
+    var conection = db.Database.GetDbConnection();
+    conection.StateChange += (_, _) => ++ _count;
+    if(state){
+        conection.Open();
+    }
+
+    for (int i = 0; i < 200; i++)
+    {
+        db.Departamentos.AsNoTracking().Any();
+    }
+
+    time.Stop();
+    var mensagem = $"Tempo: {time.Elapsed.ToString()}, State: {state.ToString()}, Count: {_count}";
+
+    Console.WriteLine(mensagem);
+}
