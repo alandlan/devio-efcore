@@ -3,7 +3,8 @@ using DominandoEfCore.Data;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
-CreateTable(args).Wait();
+HealthCheck(args).Wait();
+//CreateTable(args).Wait();
 
 static async Task CreateTable(string[] args)
 {
@@ -18,5 +19,19 @@ static async Task CreateTable(string[] args)
     generator.CreateTables();
 
     //await db.Database.MigrateAsync();
+}
+
+static async Task HealthCheck(string[] args)
+{
+    await using var db = new ApplicationContext();
+    var canConnect = await db.Database.CanConnectAsync();
+    if (canConnect)
+    {
+        Console.WriteLine("Can connect");
+    }
+    else
+    {
+        Console.WriteLine("Can't connect");
+    }
 }
 
